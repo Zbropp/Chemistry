@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الموقع المحمي بالفخامة</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* إخفاء المحتوى تماماً حتى يتم إدخال كود صحيح */
+        body { 
+            display: none; 
+            background-color: #0c0c0c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="title">مشاهدة ممتعة</h1>
+        <div class="gold-line"></div>
+        
+        <div class="video-wrapper">
+            <iframe 
+                src="https://www.youtube.com/embed/PQOMEjbSqG4" 
+                title="YouTube video player" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+            </iframe>
+        </div>
+
+        <div class="content-footer">
+            <p class="description">مرحباً بك في مساحتك الخاصة، حيث يجتمع الأداء مع الفخامة.</p>
+            <button onclick="adminReset()" class="admin-btn">إدارة الأكواد (للأدمن)</button>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "ADMIN_ANAS_2026"; 
+
+        // قائمة الـ 60 كوداً العشوائية (كما هي من الرد السابق)
+        const secretCodes = [
+            "AX92-K18J", "BN41-P09L", "CR73-M55V", "DT12-Q88X", "EY44-W21Z",
+            "FZ88-S33B", "GH56-N66C", "JK29-D44F", "LM07-R11G", "NP31-H99K",
+            "QR62-T77S", "ST45-V22M", "VW18-L33P", "XY90-J55Q", "ZA14-G11W",
+            "BC33-F66N", "DE55-K88R", "FG77-S22D", "HI99-X44T", "JK11-V00P",
+            "LM22-B11M", "NO44-Q77L", "PQ66-W99Z", "RS88-J33S", "TU00-K55G",
+            "WX13-M66H", "YZ25-P44V", "AB37-N22X", "CD49-R88K", "EF61-L00Q",
+            "GH73-T55Z", "IJ85-G11F", "KL97-S66D", "MN09-W44P", "OP21-B99L",
+            "QR33-K77M", "ST45-V22H", "UV57-N88R", "WX69-J11T", "YZ81-P55G",
+            "A1B2-C3D4", "E5F6-G7H8", "I9J0-K1L2", "M3N4-O5P6", "Q7R8-S9T0",
+            "U1V2-W3X4", "Y5Z6-A7B8", "C9D0-E1F2", "G3H4-I5J6", "K7L8-M9N0",
+            "O1P2-Q3R4", "S5T6-U7V8", "W9X0-Y1Z2", "A3B5-C7D9", "E1F4-G8H2",
+            "I6J2-K0L1", "M5N7-O2P8", "Q4R1-S6T9", "U8V3-W5X2", "Y1Z0-A9B4"
+        ];
+
+        function initSystem() {
+            if (!localStorage.getItem('availableCodes')) {
+                localStorage.setItem('availableCodes', JSON.stringify(secretCodes));
+                if (!localStorage.getItem('usedCodes')) localStorage.setItem('usedCodes', JSON.stringify([]));
+            }
+        }
+
+        function checkAccess() {
+            initSystem();
+            let available = JSON.parse(localStorage.getItem('availableCodes'));
+            let used = JSON.parse(localStorage.getItem('usedCodes'));
+
+            let userInput = prompt("الرجاء إدخال كود الدخول الخاص بك:");
+
+            if (userInput === null) return;
+
+            // دخول الأدمن
+            if (userInput === ADMIN_PASS) {
+                document.body.style.display = "flex";
+                alert("مرحباً أدمن أنس. تم تخطي الحماية.");
+                return;
+            }
+
+            // التحقق من الكود العادي
+            if (used.includes(userInput)) {
+                alert("خطأ: هذا الكود استُخدم مسبقاً! لا يمكنك الدخول به ثانية.");
+                location.reload();
+            } else if (available.includes(userInput)) {
+                // نقل الكود من المتاحة إلى المستخدمة
+                const index = available.indexOf(userInput);
+                available.splice(index, 1);
+                used.push(userInput);
+
+                localStorage.setItem('availableCodes', JSON.stringify(available));
+                localStorage.setItem('usedCodes', JSON.stringify(used));
+
+                document.body.style.display = "flex";
+                alert("تم تفعيل الكود بنجاح. مشاهدة ممتعة!");
+            } else {
+                alert("الكود غير صحيح!");
+                location.reload();
+            }
+        }
+
+        function adminReset() {
+            let pass = prompt("أدخل كود الأدمن للإدارة:");
+            if (pass === ADMIN_PASS) {
+                let action = prompt("اكتب 'reset' لتصفير كل الأكواد (ستعمل جميعاً مرة أخرى)، أو 'view' لرؤية عدد الأكواد المستخدمة:");
+                if (action === 'reset') {
+                    localStorage.removeItem('availableCodes');
+                    localStorage.removeItem('usedCodes');
+                    alert("تمت إعادة ضبط النظام وتصفير كل الأكواد.");
+                    location.reload();
+                } else if (action === 'view') {
+                    let used = JSON.parse(localStorage.getItem('usedCodes'));
+                    alert("عدد الأكواد المستخدمة حتى الآن: " + used.length);
+                }
+            } else {
+                alert("خطأ في الصلاحية!");
+            }
+        }
+
+        window.onload = checkAccess;
+    </script>
+</body>
+</html>
