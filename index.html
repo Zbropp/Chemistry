@@ -4,36 +4,284 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة رؤيه التعليمية</title>
-    <link rel="stylesheet" href="style.css">
     <style>
-        /* إخفاء المحتوى تماماً حتى يتم إدخال كود صحيح */
-        body { 
-            display: none; 
-            background-color: #0c0c0c;
+        :root {
+            --gold: #d4af37;
+            --bright-gold: #f1c40f;
+            --deep-black: #050505;
+            --error-red: #ff4d4d;
+            --glass: rgba(20, 20, 20, 0.95);
+        }
+
+        html { overflow-y: auto; height: auto; }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at center, #111 0%, var(--deep-black) 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            direction: rtl;
+            padding: 40px 0;
+            box-sizing: border-box;
+        }
+
+        /* واجهة الدخول الرئيسية */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--deep-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: 0.8s ease-in-out;
+        }
+
+        .card-style {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 25px;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0,0,0,0.9);
+            width: 320px;
+            transition: 0.4s;
+        }
+
+        /* أنيميشن الاهتزاز عند الخطأ */
+        .shake { 
+            animation: shake 0.4s ease-in-out; 
+            border-color: var(--error-red) !important; 
+            box-shadow: 0 0 20px rgba(255, 77, 77, 0.2);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        input {
+            width: 85%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            background: #000;
+            color: var(--gold);
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .gold-btn {
+            background: linear-gradient(45deg, #b8860b, var(--gold));
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 93%;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            transition: 0.3s;
+        }
+
+        /* لوحة تحكم الأدمن */
+        #admin-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        /* المحتوى الرئيسي للمنصة */
+        #main-content {
+            display: none;
+            width: 90%;
+            max-width: 850px;
+            text-align: center;
+            margin: auto;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            background: linear-gradient(to bottom, #fff, var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+
+        #timer-box {
+            font-size: 1.1rem;
+            color: var(--bright-gold);
+            margin-bottom: 25px;
+            padding: 8px 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 50px;
+            display: inline-block;
+            border: 1px solid var(--gold);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .admin-trigger {
+            margin-top: 50px;
+            padding-bottom: 30px;
+            color: var(--gold);
+            opacity: 0.4;
+            cursor: pointer;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1 class="title">مشاهدة ممتعة</h1>
-        <div class="gold-line"></div>
-        
-        <div class="video-wrapper">
-            <iframe 
-                src="https://www.youtube.com/embed/uyVLSMK2qsk" 
-                title="YouTube video player" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen>
-            </iframe>
-        </div>
-
-        <div class="content-footer">
-            <p class="description">مرحباً بك في مساحتك الخاصة، حيث يجتمع الأداء مع الفخامة.</p>
-            <button onclick="adminReset()" class="admin-btn">إدارة الأكواد (للأدمن)</button>
+    <div id="login-overlay">
+        <div class="card-style" id="login-card">
+            <h2 style="color: var(--bright-gold); margin:0;">منصة رؤيه</h2>
+            <p style="color: #666; font-size: 0.9rem;">نظام الدخول الآمن</p>
+            <input type="text" id="access-code" placeholder="أدخل كود الدخول">
+            <div id="login-error" style="color:var(--error-red); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;">⚠️ الكود غير صحيح</div>
+            <button class="gold-btn" onclick="validateAccess()">دخول المنصة</button>
         </div>
     </div>
+
+    <div id="admin-modal">
+        <div class="card-style" id="admin-card">
+            <h3 style="color: var(--bright-gold); margin-top:0;">إدارة المنصة</h3>
+            <p style="color: #888; font-size: 0.85rem;">أدخل كود الإدارة المتقدمة</p>
+            <input type="password" id="admin-input" placeholder="كلمة السر">
+            <div id="admin-error" style="color:var(--error-red); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;">⚠️ كلمة السر خاطئة</div>
+            <button class="gold-btn" onclick="executeReset()">تأفيذ التصفير</button>
+            <button style="background:none; border:none; color:#666; cursor:pointer; margin-top:15px;" onclick="closeAdmin()">إلغاء</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <h1 class="title">منصة رؤيه التعليمية</h1>
+        <div id="timer-box">⏳ جاري التحميل...</div>
+        
+        <div class="video-container">
+            <iframe src="https://www.youtube.com/embed/uyVLSMK2qsk" frameborder="0" allowfullscreen></iframe>
+        </div>
+
+        <div class="admin-trigger" onclick="openAdmin()">[ لوحة التحكم والإدارة ]</div>
+    </div>
+
+    <script>
+        const ADMIN_PASS = "R750";
+        const SESSION_DURATION = 3 * 60 * 60 * 1000;
+        const secretCodes = ["AX92-K18J", "BN41-P09L", "CR73-M55V", "DT12-Q88X", "EY44-W21Z", "FZ88-S33B", "GH56-N66C", "JK29-D44F", "LM07-R11G", "NP31-H99K", "QR62-T77S", "ST45-V22M", "VW18-L33P", "XY90-J55Q", "ZA14-G11W", "BC33-F66N", "DE55-K88R", "FG77-S22D", "HI99-X44T", "JK11-V00P", "LM22-B11M", "NO44-Q77L", "PQ66-W99Z", "RS88-J33S", "TU00-K55G", "WX13-M66H", "YZ25-P44V", "AB37-N22X", "CD49-R88K", "EF61-L00Q", "GH73-T55Z", "IJ85-G11F", "KL97-S66D", "MN09-W44P", "OP21-B99L", "QR33-K77M", "ST45-V22H", "UV57-N88R", "WX69-J11T", "YZ81-P55G", "A1B2-C3D4", "E5F6-G7H8", "I9J0-K1L2", "M3N4-O5P6", "Q7R8-S9T0", "U1V2-W3X4", "Y5Z6-A7B8", "C9D0-E1F2", "G3H4-I5J6", "K7L8-M9N0", "O1P2-Q3R4", "S5T6-U7V8", "W9X0-Y1Z2", "A3B5-C7D9", "E1F4-G8H2", "I6J2-K0L1", "M5N7-O2P8", "Q4R1-S6T9", "U8V3-W5X2", "Y1Z0-A9B4"];
+
+        function init() {
+            if (!localStorage.getItem('rv_codes')) {
+                localStorage.setItem('rv_codes', JSON.stringify(secretCodes));
+                localStorage.setItem('rv_used', JSON.stringify([]));
+            }
+            const expiry = localStorage.getItem('rv_expiry');
+            if (expiry && new Date().getTime() < expiry) showPlatform(expiry);
+        }
+
+        function validateAccess() {
+            const code = document.getElementById('access-code').value.trim();
+            const card = document.getElementById('login-card');
+            const error = document.getElementById('login-error');
+            error.style.display = 'none';
+            card.classList.remove('shake');
+
+            if (code === ADMIN_PASS) {
+                showPlatform(null);
+                return;
+            }
+
+            let available = JSON.parse(localStorage.getItem('rv_codes'));
+            if (available.includes(code)) {
+                available.splice(available.indexOf(code), 1);
+                let used = JSON.parse(localStorage.getItem('rv_used'));
+                used.push(code);
+                localStorage.setItem('rv_codes', JSON.stringify(available));
+                localStorage.setItem('rv_used', JSON.stringify(used));
+                const expiry = new Date().getTime() + SESSION_DURATION;
+                localStorage.setItem('rv_expiry', expiry);
+                showPlatform(expiry);
+            } else {
+                setTimeout(() => card.classList.add('shake'), 10);
+                error.style.display = 'block';
+            }
+        }
+
+        function showPlatform(expiry) {
+            document.getElementById('login-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                if (expiry) startTimer(expiry);
+                else document.getElementById('timer-box').innerText = "وضع الأدمن: دخول مفتوح";
+            }, 800);
+        }
+
+        function startTimer(expiry) {
+            setInterval(() => {
+                const diff = expiry - new Date().getTime();
+                if (diff <= 0) { localStorage.removeItem('rv_expiry'); location.reload(); }
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                document.getElementById('timer-box').innerText = `⏳ متبقي: ${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        function openAdmin() { document.getElementById('admin-modal').style.display = 'flex'; }
+        function closeAdmin() { 
+            document.getElementById('admin-modal').style.display = 'none'; 
+            document.getElementById('admin-card').classList.remove('shake');
+            document.getElementById('admin-error').style.display = 'none';
+        }
+        
+        function executeReset() {
+            const pass = document.getElementById('admin-input').value;
+            const card = document.getElementById('admin-card');
+            const error = document.getElementById('admin-error');
+            
+            error.style.display = 'none';
+            card.classList.remove('shake');
+
+            if (pass === ADMIN_PASS) {
+                localStorage.clear();
+                alert("تم تصفير جميع البيانات بنجاح.");
+                location.reload();
+            } else {
+                // تفعيل واجهة الخطأ للأدمن
+                setTimeout(() => card.classList.add('shake'), 10);
+                error.style.display = 'block';
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
 
     <script>
         const ADMIN_PASS = "R750"; 
