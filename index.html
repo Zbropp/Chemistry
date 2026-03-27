@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة رؤيه التعليمية</title>
     <style>
-        /* إعدادات الألوان الملكية */
         :root {
             --bg-color: #0a0a0a;
             --card-bg: #111111;
@@ -13,9 +12,9 @@
             --gold-glow: #f1c40f;
             --text-gray: #aaaaaa;
             --error-red: #ff4d4d;
+            --success-green: #2ecc71;
         }
 
-        /* تحسين التمرير وتنسيق الجسم */
         html { overflow-y: auto; scroll-behavior: smooth; }
 
         body {
@@ -33,7 +32,7 @@
             box-sizing: border-box;
         }
 
-        /* واجهة الدخول (Overlay) */
+        /* واجهة الدخول */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -54,17 +53,22 @@
             width: 350px;
             box-shadow: 20px 20px 60px #050505, -5px -5px 20px rgba(212, 175, 55, 0.05);
             transition: 0.4s;
+            position: relative;
         }
 
-        /* أنيميشن الاهتزاز عند الخطأ */
-        .shake { 
-            animation: shake 0.4s ease-in-out; 
-            border-color: var(--error-red) !important; 
-        }
+        /* أنيميشن الاهتزاز والنجاح */
+        .shake { animation: shake 0.4s ease-in-out; border-color: var(--error-red) !important; }
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
+        }
+
+        .pulse-success { animation: pulse 1.5s infinite; border-color: var(--gold-main) !important; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
         }
 
         .login-card h2 {
@@ -105,17 +109,19 @@
 
         .gold-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        /* لوحة تحكم الأدمن (Modal) */
+        /* لوحة تحكم الأدمن */
         #admin-modal {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(15px);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 3000;
         }
+
+        #success-screen { display: none; }
 
         /* المحتوى الرئيسي */
         #main-content {
@@ -163,12 +169,11 @@
 
         .video-inner iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
-        /* نص التحكم في الأسفل (تم توضيحه بناءً على طلبك) */
         .admin-trigger {
             margin-top: 60px;
             padding-bottom: 20px;
             color: var(--gold-main);
-            opacity: 0.85; /* تم توضيح اللون هنا */
+            opacity: 0.85;
             cursor: pointer;
             font-size: 0.85rem;
             letter-spacing: 1px;
@@ -192,12 +197,21 @@
 
     <div id="admin-modal">
         <div class="login-card" id="admin-card">
-            <h3 style="color: var(--bright-gold); margin:0;">لوحة التحكم</h3>
-            <p style="color: #666; font-size: 0.8rem;">إدارة الأكواد المتقدمة</p>
-            <input type="password" id="admin-input" placeholder="كلمة سر الإدارة">
-            <div id="admin-error" style="color:var(--error-red); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;">⚠️ كلمة السر خاطئة</div>
-            <button class="gold-btn" onclick="executeReset()">تصفير النظام</button>
-            <button style="background:none; border:none; color:#555; cursor:pointer; margin-top:15px;" onclick="closeAdmin()">إغلاق</button>
+            <div id="admin-input-screen">
+                <h3 style="color: var(--bright-gold); margin:0;">لوحة التحكم</h3>
+                <p style="color: #666; font-size: 0.8rem;">إدارة الأكواد المتقدمة</p>
+                <input type="password" id="admin-input" placeholder="كلمة سر الإدارة">
+                <div id="admin-error" style="color:var(--error-red); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;">⚠️ كلمة السر خاطئة</div>
+                <button class="gold-btn" onclick="executeReset()">تصفير النظام</button>
+                <button style="background:none; border:none; color:#555; cursor:pointer; margin-top:15px;" onclick="closeAdmin()">إغلاق</button>
+            </div>
+
+            <div id="success-screen">
+                <div style="font-size: 4rem; color: var(--gold-main); margin-bottom: 20px;">✓</div>
+                <h3 style="color: #fff; margin: 0;">تم بنجاح</h3>
+                <p style="color: var(--gold-glow); font-size: 0.9rem; margin-top: 10px;">تم تصفير جميع البيانات والأكواد</p>
+                <div style="color: #444; font-size: 0.7rem; margin-top: 20px;">جاري إعادة التشغيل...</div>
+            </div>
         </div>
     </div>
 
@@ -215,18 +229,17 @@
     </div>
 
     <script>
-        const ADMIN_PASS = "R750"; // كود الأدمن
-        const SESSION_DURATION = 3 * 60 * 60 * 1000; // 3 ساعات
+        const ADMIN_PASS = "R750"; 
+        const SESSION_DURATION = 3 * 60 * 60 * 1000; 
 
-        // قائمة الأكواد الـ 60
         const secretCodes = ["AX92-K18J", "BN41-P09L", "CR73-M55V", "DT12-Q88X", "EY44-W21Z", "FZ88-S33B", "GH56-N66C", "JK29-D44F", "LM07-R11G", "NP31-H99K", "QR62-T77S", "ST45-V22M", "VW18-L33P", "XY90-J55Q", "ZA14-G11W", "BC33-F66N", "DE55-K88R", "FG77-S22D", "HI99-X44T", "JK11-V00P", "LM22-B11M", "NO44-Q77L", "PQ66-W99Z", "RS88-J33S", "TU00-K55G", "WX13-M66H", "YZ25-P44V", "AB37-N22X", "CD49-R88K", "EF61-L00Q", "GH73-T55Z", "IJ85-G11F", "KL97-S66D", "MN09-W44P", "OP21-B99L", "QR33-K77M", "ST45-V22H", "UV57-N88R", "WX69-J11T", "YZ81-P55G", "A1B2-C3D4", "E5F6-G7H8", "I9J0-K1L2", "M3N4-O5P6", "Q7R8-S9T0", "U1V2-W3X4", "Y5Z6-A7B8", "C9D0-E1F2", "G3H4-I5J6", "K7L8-M9N0", "O1P2-Q3R4", "S5T6-U7V8", "W9X0-Y1Z2", "A3B5-C7D9", "E1F4-G8H2", "I6J2-K0L1", "M5N7-O2P8", "Q4R1-S6T9", "U8V3-W5X2", "Y1Z0-A9B4"];
 
         function init() {
-            if (!localStorage.getItem('rv_v4_codes')) {
-                localStorage.setItem('rv_v4_codes', JSON.stringify(secretCodes));
-                localStorage.setItem('rv_v4_used', JSON.stringify([]));
+            if (!localStorage.getItem('rv_v5_codes')) {
+                localStorage.setItem('rv_v5_codes', JSON.stringify(secretCodes));
+                localStorage.setItem('rv_v5_used', JSON.stringify([]));
             }
-            const expiry = localStorage.getItem('rv_v4_expiry');
+            const expiry = localStorage.getItem('rv_v5_expiry');
             if (expiry && new Date().getTime() < expiry) showPlatform(expiry);
         }
 
@@ -234,7 +247,6 @@
             const code = document.getElementById('access-code').value.trim();
             const card = document.getElementById('login-card');
             const error = document.getElementById('login-error');
-            
             error.style.display = 'none';
             card.classList.remove('shake');
 
@@ -243,16 +255,15 @@
                 return;
             }
 
-            let available = JSON.parse(localStorage.getItem('rv_v4_codes'));
+            let available = JSON.parse(localStorage.getItem('rv_v5_codes'));
             if (available.includes(code)) {
                 available.splice(available.indexOf(code), 1);
-                let used = JSON.parse(localStorage.getItem('rv_v4_used'));
+                let used = JSON.parse(localStorage.getItem('rv_v5_used'));
                 used.push(code);
-                localStorage.setItem('rv_v4_codes', JSON.stringify(available));
-                localStorage.setItem('rv_v4_used', JSON.stringify(used));
-                
+                localStorage.setItem('rv_v5_codes', JSON.stringify(available));
+                localStorage.setItem('rv_v5_used', JSON.stringify(used));
                 const expiry = new Date().getTime() + SESSION_DURATION;
-                localStorage.setItem('rv_v4_expiry', expiry);
+                localStorage.setItem('rv_v5_expiry', expiry);
                 showPlatform(expiry);
             } else {
                 setTimeout(() => card.classList.add('shake'), 10);
@@ -267,14 +278,14 @@
                 document.getElementById('main-content').style.display = 'block';
                 document.body.style.overflowY = 'auto';
                 if (expiry) startTimer(expiry);
-                else document.getElementById('timer-box').innerText = "ADMIN ACCESS: NO TIME LIMIT";
+                else document.getElementById('timer-box').innerText = "ADMIN ACCESS UNLOCKED";
             }, 800);
         }
 
         function startTimer(expiry) {
             setInterval(() => {
                 const diff = expiry - new Date().getTime();
-                if (diff <= 0) { localStorage.removeItem('rv_v4_expiry'); location.reload(); }
+                if (diff <= 0) { localStorage.removeItem('rv_v5_expiry'); location.reload(); }
                 const h = Math.floor(diff / 3600000);
                 const m = Math.floor((diff % 3600000) / 60000);
                 const s = Math.floor((diff % 60000) / 1000);
@@ -283,6 +294,7 @@
         }
 
         function openAdmin() { document.getElementById('admin-modal').style.display = 'flex'; }
+        
         function closeAdmin() { 
             document.getElementById('admin-modal').style.display = 'none'; 
             document.getElementById('admin-card').classList.remove('shake');
@@ -293,13 +305,23 @@
             const pass = document.getElementById('admin-input').value;
             const card = document.getElementById('admin-card');
             const error = document.getElementById('admin-error');
+            const inputScreen = document.getElementById('admin-input-screen');
+            const successScreen = document.getElementById('success-screen');
+
             error.style.display = 'none';
             card.classList.remove('shake');
 
             if (pass === ADMIN_PASS) {
+                // تفعيل واجهة النجاح الفخمة
+                inputScreen.style.display = 'none';
+                successScreen.style.display = 'block';
+                card.classList.add('pulse-success');
+                
+                // مسح البيانات وإعادة التشغيل بعد ثانيتين
                 localStorage.clear();
-                alert("تم تصفير النظام بالكامل.");
-                location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 2500);
             } else {
                 setTimeout(() => card.classList.add('shake'), 10);
                 error.style.display = 'block';
