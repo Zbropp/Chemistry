@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الموقع المحمي بالفخامة</title>
+    <title>منصة رؤيه التعليمية</title>
     <link rel="stylesheet" href="style.css">
     <style>
         /* إخفاء المحتوى تماماً حتى يتم إدخال كود صحيح */
@@ -73,13 +73,13 @@
             // دخول الأدمن
             if (userInput === ADMIN_PASS) {
                 document.body.style.display = "flex";
-                alert("مرحباً أدمن أنس. تم تخطي الحماية.");
+                alert("مرحباً ايها الادمن. تم تخطي الحماية.");
                 return;
             }
 
             // التحقق من الكود العادي
             if (used.includes(userInput)) {
-                alert("خطأ: هذا الكود استُخدم مسبقاً! لا يمكنك الدخول به ثانية.");
+                alert("خطأ: هذا الكود استُخدم مسبقاً! لا يمكنك الدخول به ");
                 location.reload();
             } else if (available.includes(userInput)) {
                 // نقل الكود من المتاحة إلى المستخدمة
