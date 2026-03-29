@@ -16,6 +16,7 @@
             --card: #111;
             --error: #e74c3c;
             --success: #2ecc71;
+            --overlay: rgba(0, 0, 0, 0.9);
         }
 
         html { overflow-y: auto; scroll-behavior: smooth; }
@@ -28,28 +29,27 @@
         .btn { background: linear-gradient(145deg, #bd952e, #f1c40f); color: #000; border: none; padding: 14px; border-radius: 15px; width: 95%; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3); }
 
+        /* الواجهات المخصصة (Custom Modals) */
+        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(10px); animation: fadeIn 0.3s; }
+        .modal-content { background: #111; border: 1px solid var(--gold); padding: 40px; border-radius: 30px; text-align: center; width: 320px; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); }
+        
         /* واجهة الطرد الفاخرة */
-        #kick-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(15px); animation: fadeIn 0.5s; }
+        #kick-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(15px); }
         .kick-card { text-align: center; border: 1px solid var(--error); padding: 50px; border-radius: 40px; background: #0a0000; box-shadow: 0 0 50px rgba(231, 76, 60, 0.2); }
         .kick-icon { font-size: 4rem; color: var(--error); margin-bottom: 20px; animation: pulseRed 2s infinite; }
         
         @keyframes pulseRed { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
-        /* واجهة نجاح الإدارة */
-        #admin-success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; }
-        .success-card { background: var(--card); border: 2px solid var(--gold); padding: 40px; border-radius: 35px; text-align: center; animation: slideUp 0.5s; }
-        .check-icon { font-size: 5rem; color: var(--gold); margin-bottom: 15px; }
-
         /* المحتوى الرئيسي */
         #main-content { display: none; width: 100%; max-width: 1000px; text-align: center; animation: fadeIn 1s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
         .video-box { position: relative; padding-bottom: 56.25%; border-radius: 30px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.3); margin-top: 30px; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
         /* لوحة التحكم */
-        #admin-section { display: none; margin-top: 60px; background: rgba(15,15,15,0.98); padding: 35px; border-radius: 35px; border: 1px solid var(--gold); }
+        #admin-section { display: none; margin-top: 60px; background: rgba(15,15,15,0.98); padding: 35px; border-radius: 35px; border: 1px solid var(--gold); animation: slideUp 0.5s; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
         .panel { background: #080808; padding: 20px; border-radius: 20px; border: 1px solid #222; }
@@ -61,6 +61,10 @@
 
         .shake { animation: shake 0.4s; border-color: var(--error) !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        /* أزرار المودال المخصصة */
+        .modal-btns { display: flex; gap: 10px; margin-top: 25px; }
+        .btn-sec { background: #222; color: #fff; }
     </style>
 </head>
 <body>
@@ -68,10 +72,33 @@
     <div id="login-overlay">
         <div class="card" id="card">
             <h2 style="color: var(--gold); margin:0;">منصة رؤيه</h2>
-            <p style="color:#444; font-size:0.65rem; letter-spacing:3px;">PREMIUM SYSTEM V8</p>
+            <p style="color:#444; font-size:0.65rem; letter-spacing:3px;">ROY'A EXCLUSIVE</p>
             <input type="text" id="access-code" placeholder="أدخل كود الدخول">
             <div id="err" style="color:var(--error); display:none; margin-top:15px; font-weight:bold;"></div>
             <button class="btn" onclick="validateAccess()">دخول</button>
+        </div>
+    </div>
+
+    <div id="admin-auth-modal" class="custom-modal">
+        <div class="modal-content">
+            <h3 style="color: var(--gold); margin-top:0;">الوصول للمشرف</h3>
+            <p style="color: #666; font-size: 0.8rem;">أدخل رمز التحقق للإدارة</p>
+            <input type="password" id="admin-pass-input" placeholder="••••••">
+            <div class="modal-btns">
+                <button class="btn" onclick="confirmAdminAuth()">تحقق</button>
+                <button class="btn btn-sec" onclick="closeModal('admin-auth-modal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-kick-modal" class="custom-modal">
+        <div class="modal-content" style="border-color: var(--error);">
+            <h3 style="color: var(--error); margin-top:0;">تأكيد الإجراء</h3>
+            <p id="kick-desc" style="color: #888; font-size: 0.85rem;">هل أنت متأكد من طرد هذا المستخدم نهائياً؟</p>
+            <div class="modal-btns">
+                <button class="btn" style="background: var(--error);" id="confirm-kick-btn">طرد الآن</button>
+                <button class="btn btn-sec" onclick="closeModal('confirm-kick-modal')">تراجع</button>
+            </div>
         </div>
     </div>
 
@@ -79,38 +106,28 @@
         <div class="kick-card">
             <div class="kick-icon">🔒</div>
             <h2 style="color: #fff; margin: 0;">انتهت جلستك</h2>
-            <p style="color: #666; margin-top: 10px;">تم إنهاء الدخول من قبل الإدارة أو انتهاء الوقت</p>
-            <button class="btn" onclick="location.reload()" style="width: auto; padding: 10px 40px; margin-top: 30px;">عودة للرئيسية</button>
-        </div>
-    </div>
-
-    <div id="admin-success-overlay">
-        <div class="success-card">
-            <div class="check-icon">⚜️</div>
-            <h2 style="color: var(--gold);">تمت العملية بنجاح</h2>
-            <p style="color: #888;">تم تحديث قاعدة البيانات السحابية فوراً</p>
-            <div style="color: #444; font-size: 0.7rem; margin-top: 20px;">جاري إغلاق النافذة...</div>
+            <p style="color: #666; margin-top: 10px;">تم إنهاء الدخول من قبل الإدارة</p>
+            <button class="btn" onclick="location.reload()" style="width: auto; padding: 10px 40px; margin-top: 30px;">عودة</button>
         </div>
     </div>
 
     <div id="main-content">
         <h1 style="background: linear-gradient(#fff, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">منصة رؤيه التعليمية</h1>
-        <div id="timer" style="color:var(--gold); font-weight:bold; margin-bottom:20px;">⌛ جاري المزامنة...</div>
+        <div id="timer" style="color:var(--gold); font-weight:bold; margin-bottom:20px;">⏳ جاري المزامنة...</div>
         <div class="video-box"><iframe src="https://www.youtube.com/embed/uyVLSMK2qsk" allowfullscreen></iframe></div>
 
         <div id="admin-section">
             <h3 style="color: var(--gold); margin-bottom: 25px;">لوحة تحكم الإدارة</h3>
             <div style="display:flex; gap:12px; justify-content:center; margin-bottom:30px;">
                 <input type="text" id="new-code" style="width:220px; margin:0;" placeholder="إنشاء كود جديد">
-                <button class="btn" style="width:auto; margin:0; padding:12px 30px;" onclick="addNewCode()">تفعيل الكود</button>
+                <button class="btn" style="width:auto; margin:0; padding:12px 30px;" onclick="addNewCode()">تفعيل</button>
             </div>
             <div class="admin-grid">
                 <div class="panel"><h4 style="color:var(--success)">الأكواد المفعّلة</h4><table id="codes-table"><thead><tr><th>الكود</th><th>إجراء</th></tr></thead><tbody id="codes-body"></tbody></table></div>
                 <div class="panel"><h4 style="color:var(--gold)">الجلسات النشطة</h4><table><thead><tr><th>الكود</th><th>الجهاز</th><th>طرد</th></tr></thead><tbody id="logs-body"></tbody></table></div>
             </div>
-            <button class="btn" style="width:auto; background:none; border:1px solid #333; color:#555; margin-top:40px;" onclick="resetSystem()">تصفير شامل</button>
         </div>
-        <div style="margin-top:60px; opacity:0.2; cursor:pointer;" onclick="openAdmin()">[ لوحة الإدارة ]</div>
+        <div style="margin-top:60px; opacity:0.2; cursor:pointer;" onclick="showModal('admin-auth-modal')">[ لوحة الإدارة ]</div>
     </div>
 
     <script>
@@ -148,7 +165,7 @@
                             unlock(expiry);
                         }
                     });
-                } else { showError("⚠️ كود خاطئ أو غير مفعل!"); }
+                } else { showError("⚠️ كود غير مفعل!"); }
             });
         }
 
@@ -164,7 +181,7 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 if(expiry) startTimer(expiry);
-                else document.getElementById('timer').innerText = "وضع الإدارة المفتوح";
+                else document.getElementById('timer').innerText = "وضع الإدارة";
                 
                 const myCode = localStorage.getItem('my_code');
                 if(myCode) {
@@ -185,20 +202,22 @@
                 if(diff <= 0) { localStorage.clear(); location.reload(); }
                 const m = Math.floor((diff%3600000)/60000);
                 const s = Math.floor((diff%60000)/1000);
-                document.getElementById('timer').innerText = `⏳ متبقي لك: ${m}:${s}`;
+                document.getElementById('timer').innerText = `⏳ متبقي: ${m}:${s}`;
             }, 1000);
         }
 
-        function showAdminSuccess() {
-            const overlay = document.getElementById('admin-success-overlay');
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
-        }
+        // وظائف المودال الجديدة
+        function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function openAdmin() {
-            if(prompt("باسورد الإدارة:") === ADMIN_PASS) {
+        function confirmAdminAuth() {
+            const pass = document.getElementById('admin-pass-input').value;
+            if(pass === ADMIN_PASS) {
+                closeModal('admin-auth-modal');
                 document.getElementById('admin-section').style.display = 'block';
                 loadAdminData();
+            } else {
+                alert("رمز خطأ!");
             }
         }
 
@@ -206,46 +225,45 @@
             const code = document.getElementById('new-code').value.trim();
             if(code) db.ref('active_codes/' + code).set(true).then(() => {
                 document.getElementById('new-code').value = "";
-                showAdminSuccess();
             });
         }
 
         function loadAdminData() {
             db.ref('active_codes').on('value', snap => {
-                const body = document.getElementById('codes-body');
-                body.innerHTML = "";
+                const body = document.getElementById('codes-body'); body.innerHTML = "";
                 snap.forEach(child => {
                     if(child.val() === true) {
-                        body.innerHTML += `<tr><td>${child.key}</td><td><button class="del-btn" onclick="deleteCode('${child.key}')">حذف</button></td></tr>`;
+                        body.innerHTML += `<tr><td>${child.key}</td><td><button class="del-btn" onclick="confirmDeleteCode('${child.key}')">حذف</button></td></tr>`;
                     }
                 });
             });
             db.ref('logs').on('value', snap => {
-                const body = document.getElementById('logs-body');
-                body.innerHTML = "";
+                const body = document.getElementById('logs-body'); body.innerHTML = "";
                 snap.forEach(child => {
-                    body.innerHTML += `<tr><td style="color:var(--gold)">${child.key}</td><td>${child.val().device}</td><td><button class="del-btn" onclick="terminate('${child.key}')">طرد</button></td></tr>`;
+                    body.innerHTML += `<tr><td style="color:var(--gold)">${child.key}</td><td>${child.val().device}</td><td><button class="del-btn" onclick="confirmTerminate('${child.key}')">طرد</button></td></tr>`;
                 });
             });
         }
 
-        function deleteCode(code) {
-            if(confirm("حذف الكود؟")) { 
-                db.ref('active_codes/' + code).remove(); 
+        function confirmDeleteCode(code) {
+            showModal('confirm-kick-modal');
+            document.getElementById('kick-desc').innerText = `حذف الكود (${code})؟ سيتم طرد المستخدم.`;
+            document.getElementById('confirm-kick-btn').onclick = () => {
+                db.ref('active_codes/' + code).remove();
                 db.ref('logs/' + code).remove();
-                showAdminSuccess();
-            }
+                closeModal('confirm-kick-modal');
+            };
         }
 
-        function terminate(code) {
-            if(confirm("طرد المستخدم؟")) { 
-                db.ref('logs/' + code).remove(); 
+        function confirmTerminate(code) {
+            showModal('confirm-kick-modal');
+            document.getElementById('kick-desc').innerText = `هل تريد طرد المستخدم صاحب الكود (${code})؟`;
+            document.getElementById('confirm-kick-btn').onclick = () => {
+                db.ref('logs/' + code).remove();
                 db.ref('active_codes/' + code).set(false);
-                showAdminSuccess();
-            }
+                closeModal('confirm-kick-modal');
+            };
         }
-
-        function resetSystem() { if(confirm("تصفير شامل؟")) db.ref('/').remove(); }
 
         window.onload = () => {
             const session = localStorage.getItem('rv_session');
