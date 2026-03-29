@@ -8,65 +8,81 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
     <style>
-        :root { --gold: #d4af37; --bg: #0a0a0a; --card: #111; --error: #ff4d4d; }
-        html { overflow-y: auto; }
+        :root { --gold: #d4af37; --bg: #0a0a0a; --card: #111; --error: #ff4d4d; --success: #2ecc71; }
+        html { overflow-y: auto; scroll-behavior: smooth; }
         body { margin: 0; background: radial-gradient(circle, #1a1a1a, #0a0a0a); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; padding: 20px; }
         
-        /* واجهة الدخول */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 2000; transition: 0.8s; }
-        .card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); text-align: center; width: 320px; box-shadow: 0 20px 50px #000; }
-        input { width: 85%; padding: 12px; border-radius: 12px; border: none; background: #000; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; }
-        .btn { background: linear-gradient(45deg, #bd952e, #f1c40f); color: #000; border: none; padding: 12px; border-radius: 12px; width: 93%; font-weight: bold; cursor: pointer; margin-top: 20px; }
-        .shake { animation: shake 0.4s ease-in-out; border-color: var(--error) !important; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); text-align: center; width: 320px; box-shadow: 0 20px 50px #000; position: relative; }
+        
+        input { width: 85%; padding: 12px; border-radius: 12px; border: none; background: #000; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; border: 1px solid #222; }
+        input:focus { border-color: var(--gold); }
+        .btn { background: linear-gradient(45deg, #bd952e, #f1c40f); color: #000; border: none; padding: 12px; border-radius: 12px; width: 93%; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
 
-        /* المحتوى الرئيسي */
-        #main-content { display: none; width: 100%; max-width: 850px; text-align: center; }
-        .video-box { position: relative; padding-bottom: 56.25%; border-radius: 20px; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 0 30px rgba(212, 175, 55, 0.2); margin-top: 20px; }
+        #main-content { display: none; width: 100%; max-width: 900px; text-align: center; }
+        .video-box { position: relative; padding-bottom: 56.25%; border-radius: 25px; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); margin-top: 30px; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
-        /* لوحة مراقبة الطلاب (للأدمن فقط) */
-        #admin-panel { display: none; margin-top: 50px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid var(--gold); }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
-        th, td { border-bottom: 1px solid #333; padding: 10px; text-align: right; }
-        th { color: var(--gold); }
+        /* لوحة الأدمن المتطورة */
+        #admin-section { display: none; margin-top: 60px; background: rgba(20,20,20,0.9); padding: 30px; border-radius: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px #000; }
+        .admin-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
+        .admin-input { width: 200px; margin-top: 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #000; border-radius: 15px; overflow: hidden; }
+        th, td { padding: 15px; border-bottom: 1px solid #222; text-align: center; font-size: 0.9rem; }
+        th { background: #1a1a1a; color: var(--gold); }
+        tr:hover { background: #0d0d0d; }
+
+        .shake { animation: shake 0.4s; border-color: var(--error) !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
         <div class="card" id="card">
-            <h2 style="color: var(--gold);">منصة رؤيه</h2>
+            <h2 style="color: var(--gold); margin:0;">منصة رؤيه</h2>
+            <p style="color:#555; font-size:0.7rem; letter-spacing:2px;">S Y S T E M  V 6 . 0</p>
             <input type="text" id="access-code" placeholder="أدخل كود الدخول">
-            <div id="err" style="color:var(--error); display:none; margin-top:10px;">⚠️ كود غير صحيح</div>
+            <div id="err" style="color:var(--error); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;"></div>
             <button class="btn" onclick="validateAccess()">دخول المنصة</button>
         </div>
     </div>
 
     <div id="main-content">
-        <h1 style="background: linear-gradient(#fff, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">منصة رؤيه التعليمية</h1>
-        <div id="timer" style="color:var(--gold); font-weight:bold; margin-bottom:20px;">⏳ متبقي: --:--:--</div>
+        <h1 style="font-size: 2.5rem; background: linear-gradient(#fff, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">منصة رؤيه التعليمية</h1>
+        <div id="timer" style="color:var(--gold); font-weight:bold; font-size:1.2rem; margin-bottom:20px;">⌛ جاري التحميل...</div>
         
         <div class="video-box">
             <iframe src="https://www.youtube.com/embed/uyVLSMK2qsk" allowfullscreen></iframe>
         </div>
 
-        <div id="admin-panel">
-            <h3>سجل دخول الطلاب (مباشر)</h3>
-            <table>
-                <thead>
-                    <tr><th>الكود</th><th>الوقت</th><th>الجهاز</th></tr>
-                </thead>
-                <tbody id="logs-body"></tbody>
-            </table>
-            <button class="btn" style="width:auto; padding: 5px 20px; margin-top: 10px;" onclick="resetAll()">تصفير السجلات</button>
+        <div id="admin-section">
+            <h2 style="color: var(--gold); margin-bottom:20px;">لوحة تحكم أنس (الإدارة)</h2>
+            
+            <div class="admin-controls">
+                <input type="text" id="new-code" class="admin-input" placeholder="اكتب كود جديد">
+                <button class="btn" style="width:auto; margin-top:0; padding: 10px 30px;" onclick="addNewCode()">تفعيل الكود</button>
+            </div>
+
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr><th>الكود المُستخدم</th><th>وقت الدخول</th><th>الجهاز</th></tr>
+                    </thead>
+                    <tbody id="logs-body"></tbody>
+                </table>
+            </div>
+            
+            <button class="btn" style="width:auto; background: #333; color:#fff; margin-top:30px;" onclick="resetSystem()">تصفير النظام بالكامل</button>
         </div>
         
-        <div style="margin-top:40px; opacity:0.3; cursor:pointer;" onclick="showAdminPanel()">[ إدارة المنصة ]</div>
+        <div style="margin-top:50px; opacity:0.2; cursor:pointer;" onclick="openAdmin()">[ لوحة الإدارة ]</div>
     </div>
 
     <script>
-        // دمج الـ Config الخاص بك
+        // إعدادات Firebase الخاصة بأنس
         const firebaseConfig = {
             apiKey: "AIzaSyBfPImebWX2-6smMWL_CvL3oqliuLK99OY",
             authDomain: "roya-platform.firebaseapp.com",
@@ -79,37 +95,50 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-
         const ADMIN_PASS = "R750";
 
+        // التحقق من الدخول
         function validateAccess() {
             const code = document.getElementById('access-code').value.trim();
             const card = document.getElementById('card');
             const err = document.getElementById('err');
+            err.style.display = 'none';
+            card.classList.remove('shake');
 
-            if (code === ADMIN_PASS) {
-                unlock(null);
-                return;
-            }
+            if (code === ADMIN_PASS) { unlock(null); return; }
 
-            // التحقق من الكود لايف
-            db.ref('logs/' + code.replace('.','_')).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    err.innerText = "⚠️ هذا الكود مستخدم من قبل!";
-                    err.style.display = 'block';
-                    card.classList.add('shake');
-                    setTimeout(() => card.classList.remove('shake'), 400);
+            // 1. هل الكود مفعل من قبل أنس؟
+            db.ref('active_codes/' + code).once('value', snapshot => {
+                if (snapshot.exists() && snapshot.val() === true) {
+                    
+                    // 2. هل استخدمه أحد من قبل؟
+                    db.ref('logs/' + code).once('value', logSnap => {
+                        if (logSnap.exists()) {
+                            showError("⚠️ هذا الكود مستخدم مسبقاً!");
+                        } else {
+                            // 3. نجاح الدخول - تسجيل البيانات
+                            const info = {
+                                time: new Date().toLocaleString('ar-EG'),
+                                device: (navigator.userAgent.includes("Mobi") ? "Mobile" : "PC") + " (" + navigator.platform + ")"
+                            };
+                            db.ref('logs/' + code).set(info);
+                            const expiry = new Date().getTime() + (3*60*60*1000);
+                            localStorage.setItem('rv_session', expiry);
+                            unlock(expiry);
+                        }
+                    });
                 } else {
-                    // تسجيل الدخول لأول مرة
-                    const info = {
-                        time: new Date().toLocaleString('ar-EG'),
-                        device: navigator.platform + " / " + (navigator.userAgent.includes("Mobi") ? "Mobile" : "Desktop")
-                    };
-                    db.ref('logs/' + code.replace('.','_')).set(info);
-                    localStorage.setItem('rv_session', new Date().getTime() + (3*60*60*1000));
-                    unlock(localStorage.getItem('rv_session'));
+                    showError("⚠️ الكود غير مفعل أو خاطئ!");
                 }
             });
+        }
+
+        function showError(msg) {
+            const err = document.getElementById('err');
+            err.innerText = msg;
+            err.style.display = 'block';
+            document.getElementById('card').classList.add('shake');
+            setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
         }
 
         function unlock(expiry) {
@@ -118,14 +147,14 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 if(expiry) startTimer(expiry);
-                else document.getElementById('timer').innerText = "وضع الأدمن المفتوح";
+                else document.getElementById('timer').innerText = "دخول الإدارة: مفتوح دائماً";
             }, 800);
         }
 
         function startTimer(expiry) {
             setInterval(() => {
                 const diff = expiry - new Date().getTime();
-                if(diff <= 0) location.reload();
+                if(diff <= 0) { localStorage.removeItem('rv_session'); location.reload(); }
                 const h = Math.floor(diff/3600000);
                 const m = Math.floor((diff%3600000)/60000);
                 const s = Math.floor((diff%60000)/1000);
@@ -133,11 +162,22 @@
             }, 1000);
         }
 
-        function showAdminPanel() {
-            if(prompt("كلمة سر الأدمن:") === ADMIN_PASS) {
-                document.getElementById('admin-panel').style.display = 'block';
+        // وظائف الأدمن
+        function openAdmin() {
+            if(prompt("كلمة سر الإدارة:") === ADMIN_PASS) {
+                document.getElementById('admin-section').style.display = 'block';
                 loadLogs();
+                window.scrollTo(0, document.body.scrollHeight);
             }
+        }
+
+        function addNewCode() {
+            const code = document.getElementById('new-code').value.trim();
+            if(!code) return;
+            db.ref('active_codes/' + code).set(true).then(() => {
+                alert("تم تفعيل الكود: " + code);
+                document.getElementById('new-code').value = "";
+            });
         }
 
         function loadLogs() {
@@ -145,15 +185,15 @@
                 const body = document.getElementById('logs-body');
                 body.innerHTML = "";
                 snapshot.forEach(child => {
-                    const data = child.val();
-                    body.innerHTML += `<tr><td>${child.key}</td><td>${data.time}</td><td>${data.device}</td></tr>`;
+                    const d = child.val();
+                    body.innerHTML += `<tr><td>${child.key}</td><td>${d.time}</td><td>${d.device}</td></tr>`;
                 });
             });
         }
 
-        function resetAll() {
-            if(confirm("هل تريد تصفير جميع سجلات الدخول؟")) {
-                db.ref('logs').remove();
+        function resetSystem() {
+            if(confirm("سيتم حذف جميع الأكواد المفعلة وسجلات الدخول.. هل أنت متأكد؟")) {
+                db.ref('/').remove();
                 localStorage.clear();
                 location.reload();
             }
