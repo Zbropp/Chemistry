@@ -10,29 +10,30 @@
     <style>
         :root { --gold: #d4af37; --bg: #0a0a0a; --card: #111; --error: #ff4d4d; --success: #2ecc71; }
         html { overflow-y: auto; scroll-behavior: smooth; }
-        body { margin: 0; background: radial-gradient(circle, #1a1a1a, #0a0a0a); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; padding: 20px; }
+        body { margin: 0; background: radial-gradient(circle, #1a1a1a, #0a0a0a); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; padding: 20px; box-sizing: border-box; }
         
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 2000; transition: 0.8s; }
-        .card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); text-align: center; width: 320px; box-shadow: 0 20px 50px #000; position: relative; }
+        .card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); text-align: center; width: 320px; box-shadow: 0 20px 50px #000; }
         
-        input { width: 85%; padding: 12px; border-radius: 12px; border: none; background: #000; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; border: 1px solid #222; }
+        input { width: 85%; padding: 12px; border-radius: 12px; border: 1px solid #222; background: #000; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; }
         input:focus { border-color: var(--gold); }
         .btn { background: linear-gradient(45deg, #bd952e, #f1c40f); color: #000; border: none; padding: 12px; border-radius: 12px; width: 93%; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
 
-        #main-content { display: none; width: 100%; max-width: 900px; text-align: center; }
+        #main-content { display: none; width: 100%; max-width: 900px; text-align: center; animation: fadeIn 1s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .video-box { position: relative; padding-bottom: 56.25%; border-radius: 25px; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); margin-top: 30px; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
-        /* لوحة الأدمن المتطورة */
-        #admin-section { display: none; margin-top: 60px; background: rgba(20,20,20,0.9); padding: 30px; border-radius: 30px; border: 1px solid var(--gold); box-shadow: 0 10px 30px #000; }
-        .admin-controls { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 30px; }
-        .admin-input { width: 200px; margin-top: 0; }
-        
+        /* لوحة الأدمن */
+        #admin-section { display: none; margin-top: 60px; background: rgba(20,20,20,0.95); padding: 30px; border-radius: 30px; border: 1px solid var(--gold); }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #000; border-radius: 15px; overflow: hidden; }
-        th, td { padding: 15px; border-bottom: 1px solid #222; text-align: center; font-size: 0.9rem; }
-        th { background: #1a1a1a; color: var(--gold); }
-        tr:hover { background: #0d0d0d; }
+        th, td { padding: 12px; border-bottom: 1px solid #222; text-align: center; font-size: 0.85rem; }
+        th { color: var(--gold); background: #1a1a1a; }
+        
+        .delete-btn { background: none; border: 1px solid var(--error); color: var(--error); padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 0.7rem; transition: 0.3s; }
+        .delete-btn:hover { background: var(--error); color: #fff; }
 
         .shake { animation: shake 0.4s; border-color: var(--error) !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
@@ -43,7 +44,7 @@
     <div id="login-overlay">
         <div class="card" id="card">
             <h2 style="color: var(--gold); margin:0;">منصة رؤيه</h2>
-            <p style="color:#555; font-size:0.7rem; letter-spacing:2px;">S Y S T E M  V 6 . 0</p>
+            <p style="color:#555; font-size:0.7rem; letter-spacing:2px;">S E C U R E  S Y S T E M</p>
             <input type="text" id="access-code" placeholder="أدخل كود الدخول">
             <div id="err" style="color:var(--error); display:none; margin-top:15px; font-weight:bold; font-size:0.85rem;"></div>
             <button class="btn" onclick="validateAccess()">دخول المنصة</button>
@@ -59,30 +60,25 @@
         </div>
 
         <div id="admin-section">
-            <h2 style="color: var(--gold); margin-bottom:20px;">لوحة تحكم أنس (الإدارة)</h2>
-            
-            <div class="admin-controls">
-                <input type="text" id="new-code" class="admin-input" placeholder="اكتب كود جديد">
-                <button class="btn" style="width:auto; margin-top:0; padding: 10px 30px;" onclick="addNewCode()">تفعيل الكود</button>
+            <h3 style="color: var(--gold);">لوحة تحكم أنس</h3>
+            <div style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+                <input type="text" id="new-code" style="width:180px; margin:0;" placeholder="كود جديد">
+                <button class="btn" style="width:auto; margin:0; padding:10px 20px;" onclick="addNewCode()">تفعيل</button>
             </div>
-
-            <div style="max-height: 300px; overflow-y: auto;">
-                <table>
-                    <thead>
-                        <tr><th>الكود المُستخدم</th><th>وقت الدخول</th><th>الجهاز</th></tr>
-                    </thead>
-                    <tbody id="logs-body"></tbody>
-                </table>
-            </div>
-            
-            <button class="btn" style="width:auto; background: #333; color:#fff; margin-top:30px;" onclick="resetSystem()">تصفير النظام بالكامل</button>
+            <table>
+                <thead>
+                    <tr><th>الكود</th><th>الوقت</th><th>الجهاز</th><th>إدارة</th></tr>
+                </thead>
+                <tbody id="logs-body"></tbody>
+            </table>
+            <button class="btn" style="width:auto; background:#333; color:#fff; margin-top:20px;" onclick="resetSystem()">تصفير شامل</button>
         </div>
         
         <div style="margin-top:50px; opacity:0.2; cursor:pointer;" onclick="openAdmin()">[ لوحة الإدارة ]</div>
     </div>
 
     <script>
-        // إعدادات Firebase الخاصة بأنس
+        // إعدادات Firebase الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyBfPImebWX2-6smMWL_CvL3oqliuLK99OY",
             authDomain: "roya-platform.firebaseapp.com",
@@ -97,7 +93,6 @@
         const db = firebase.database();
         const ADMIN_PASS = "R750";
 
-        // التحقق من الدخول
         function validateAccess() {
             const code = document.getElementById('access-code').value.trim();
             const card = document.getElementById('card');
@@ -107,38 +102,31 @@
 
             if (code === ADMIN_PASS) { unlock(null); return; }
 
-            // 1. هل الكود مفعل من قبل أنس؟
             db.ref('active_codes/' + code).once('value', snapshot => {
                 if (snapshot.exists() && snapshot.val() === true) {
-                    
-                    // 2. هل استخدمه أحد من قبل؟
                     db.ref('logs/' + code).once('value', logSnap => {
                         if (logSnap.exists()) {
-                            showError("⚠️ هذا الكود مستخدم مسبقاً!");
+                            showError("⚠️ الكود مستخدم بالفعل!");
                         } else {
-                            // 3. نجاح الدخول - تسجيل البيانات
                             const info = {
                                 time: new Date().toLocaleString('ar-EG'),
-                                device: (navigator.userAgent.includes("Mobi") ? "Mobile" : "PC") + " (" + navigator.platform + ")"
+                                device: (navigator.userAgent.includes("Mobi") ? "Mobile" : "PC")
                             };
                             db.ref('logs/' + code).set(info);
                             const expiry = new Date().getTime() + (3*60*60*1000);
                             localStorage.setItem('rv_session', expiry);
+                            localStorage.setItem('last_code', code);
                             unlock(expiry);
                         }
                     });
-                } else {
-                    showError("⚠️ الكود غير مفعل أو خاطئ!");
-                }
+                } else { showError("⚠️ الكود غير مفعل!"); }
             });
         }
 
         function showError(msg) {
             const err = document.getElementById('err');
-            err.innerText = msg;
-            err.style.display = 'block';
+            err.innerText = msg; err.style.display = 'block';
             document.getElementById('card').classList.add('shake');
-            setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
         }
 
         function unlock(expiry) {
@@ -147,14 +135,22 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 if(expiry) startTimer(expiry);
-                else document.getElementById('timer').innerText = "دخول الإدارة: مفتوح دائماً";
+                else document.getElementById('timer').innerText = "وضع الأدمن المفتوح";
+                
+                // مراقبة الجلسة لايف (للطرد)
+                const myCode = localStorage.getItem('last_code');
+                if(myCode) {
+                    db.ref('logs/' + myCode).on('value', snap => {
+                        if(!snap.exists()) { alert("تم إنهاء جلستك!"); localStorage.clear(); location.reload(); }
+                    });
+                }
             }, 800);
         }
 
         function startTimer(expiry) {
             setInterval(() => {
                 const diff = expiry - new Date().getTime();
-                if(diff <= 0) { localStorage.removeItem('rv_session'); location.reload(); }
+                if(diff <= 0) { localStorage.clear(); location.reload(); }
                 const h = Math.floor(diff/3600000);
                 const m = Math.floor((diff%3600000)/60000);
                 const s = Math.floor((diff%60000)/1000);
@@ -162,41 +158,41 @@
             }, 1000);
         }
 
-        // وظائف الأدمن
         function openAdmin() {
             if(prompt("كلمة سر الإدارة:") === ADMIN_PASS) {
                 document.getElementById('admin-section').style.display = 'block';
                 loadLogs();
-                window.scrollTo(0, document.body.scrollHeight);
             }
         }
 
         function addNewCode() {
             const code = document.getElementById('new-code').value.trim();
-            if(!code) return;
-            db.ref('active_codes/' + code).set(true).then(() => {
-                alert("تم تفعيل الكود: " + code);
-                document.getElementById('new-code').value = "";
+            if(code) db.ref('active_codes/' + code).set(true).then(() => {
+                alert("تم تفعيل الكود: " + code); document.getElementById('new-code').value = "";
             });
         }
 
         function loadLogs() {
-            db.ref('logs').on('value', snapshot => {
+            db.ref('logs').on('value', snap => {
                 const body = document.getElementById('logs-body');
                 body.innerHTML = "";
-                snapshot.forEach(child => {
+                snap.forEach(child => {
                     const d = child.val();
-                    body.innerHTML += `<tr><td>${child.key}</td><td>${d.time}</td><td>${d.device}</td></tr>`;
+                    body.innerHTML += `<tr><td>${child.key}</td><td>${d.time}</td><td>${d.device}</td>
+                    <td><button class="delete-btn" onclick="terminateSession('${child.key}')">حذف</button></td></tr>`;
                 });
             });
         }
 
-        function resetSystem() {
-            if(confirm("سيتم حذف جميع الأكواد المفعلة وسجلات الدخول.. هل أنت متأكد؟")) {
-                db.ref('/').remove();
-                localStorage.clear();
-                location.reload();
+        function terminateSession(code) {
+            if(confirm("طرد هذا المستخدم؟")) {
+                db.ref('logs/' + code).remove();
+                db.ref('active_codes/' + code).set(false);
             }
+        }
+
+        function resetSystem() {
+            if(confirm("تصفير شامل؟")) { db.ref('/').remove(); localStorage.clear(); location.reload(); }
         }
 
         window.onload = () => {
@@ -206,3 +202,4 @@
     </script>
 </body>
 </html>
+
