@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة رؤيه التعليمية - الإصدار الملكي</title>
+    <title>منصة رؤيه التعليمية</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -33,6 +33,12 @@
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 5000; backdrop-filter: blur(10px); animation: fadeIn 0.3s; }
         .modal-content { background: #111; border: 1px solid var(--gold); padding: 40px; border-radius: 30px; text-align: center; width: 320px; box-shadow: 0 0 40px rgba(212, 175, 55, 0.2); }
         
+        /* شاشة الخطأ الملكية الجديدة بدلاً من نافذة المتصفح */
+        #error-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); display: none; justify-content: center; align-items: center; z-index: 6000; backdrop-filter: blur(20px); animation: fadeIn 0.4s; }
+        .error-message { text-align: center; border-radius: 20px; text-shadow: 0 0 20px var(--error); animation: shake 0.5s ease-in-out; }
+        .error-title { font-size: 3.5rem; color: var(--error); margin: 0; }
+        .error-desc { color: #888; font-size: 1rem; margin-top: 10px; }
+
         /* واجهة الطرد الفاخرة */
         #kick-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(15px); }
         .kick-card { text-align: center; border: 1px solid var(--error); padding: 50px; border-radius: 40px; background: #0a0000; box-shadow: 0 0 50px rgba(231, 76, 60, 0.2); }
@@ -76,6 +82,14 @@
             <input type="text" id="access-code" placeholder="أدخل كود الدخول">
             <div id="err" style="color:var(--error); display:none; margin-top:15px; font-weight:bold;"></div>
             <button class="btn" onclick="validateAccess()">دخول</button>
+        </div>
+    </div>
+
+    <div id="error-overlay">
+        <div class="error-message">
+            <div class="error-title">رمز خطأ!</div>
+            <div class="error-desc">يبدو أن هناك خطأ في الرمز المدخل..</div>
+            <button class="btn" onclick="closeErrorOverlay()" style="width: auto; padding: 10px 40px; margin-top: 30px;">حاول مرة أخرى</button>
         </div>
     </div>
 
@@ -206,9 +220,15 @@
             }, 1000);
         }
 
-        // وظائف المودال الجديدة
         function showModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        
+        // وظائف شاشة الخطأ الملكية الجديدة
+        function showErrorOverlay() { document.getElementById('error-overlay').style.display = 'flex'; }
+        function closeErrorOverlay() { 
+            document.getElementById('error-overlay').style.display = 'none';
+            document.getElementById('admin-pass-input').value = ""; // مسح الباسوورد الخطأ
+        }
 
         function confirmAdminAuth() {
             const pass = document.getElementById('admin-pass-input').value;
@@ -217,7 +237,8 @@
                 document.getElementById('admin-section').style.display = 'block';
                 loadAdminData();
             } else {
-                alert("رمز خطأ!");
+                closeModal('admin-auth-modal'); // إغلاق مودال الطلب أولاً
+                showErrorOverlay(); // إظهار شاشة الخطأ الملكية
             }
         }
 
