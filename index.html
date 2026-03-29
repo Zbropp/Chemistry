@@ -3,36 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة رؤيه التعليمية - الإدارة</title>
+    <title>منصة رؤيه التعليمية - الإصدار الملكي</title>
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     
     <style>
-        :root { --gold: #d4af37; --bg: #0a0a0a; --card: #111; --error: #e74c3c; --success: #2ecc71; }
-        body { margin: 0; background: radial-gradient(circle, #1a1a1a, #0a0a0a); color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; padding: 20px; box-sizing: border-box; }
+        :root {
+            --gold: #d4af37;
+            --gold-glow: #f1c40f;
+            --bg: #0a0a0a;
+            --card: #111;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+
+        html { overflow-y: auto; scroll-behavior: smooth; }
+        body { margin: 0; background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 100%); color: #fff; font-family: 'Segoe UI', Tahoma, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; direction: rtl; padding: 20px; box-sizing: border-box; }
         
+        /* واجهة الدخول */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); display: flex; justify-content: center; align-items: center; z-index: 2000; transition: 0.8s; }
-        .card { background: var(--card); padding: 40px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); text-align: center; width: 320px; box-shadow: 0 20px 50px #000; }
+        .card { background: var(--card); padding: 40px; border-radius: 35px; border: 1px solid rgba(212, 175, 55, 0.15); text-align: center; width: 340px; box-shadow: 0 25px 60px rgba(0,0,0,0.8); position: relative; }
+        input { width: 88%; padding: 14px; border-radius: 15px; border: 1px solid #222; background: #050505; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; }
+        .btn { background: linear-gradient(145deg, #bd952e, #f1c40f); color: #000; border: none; padding: 14px; border-radius: 15px; width: 95%; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3); }
+
+        /* واجهة الطرد الفاخرة */
+        #kick-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 3000; backdrop-filter: blur(15px); animation: fadeIn 0.5s; }
+        .kick-card { text-align: center; border: 1px solid var(--error); padding: 50px; border-radius: 40px; background: #0a0000; box-shadow: 0 0 50px rgba(231, 76, 60, 0.2); }
+        .kick-icon { font-size: 4rem; color: var(--error); margin-bottom: 20px; animation: pulseRed 2s infinite; }
         
-        input { width: 85%; padding: 12px; border-radius: 12px; border: 1px solid #222; background: #000; color: var(--gold); text-align: center; margin-top: 20px; outline: none; font-size: 1.1rem; }
-        .btn { background: linear-gradient(45deg, #bd952e, #f1c40f); color: #000; border: none; padding: 12px; border-radius: 12px; width: 95%; font-weight: bold; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+        @keyframes pulseRed { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.7; } 100% { transform: scale(1); opacity: 1; } }
 
-        #main-content { display: none; width: 100%; max-width: 1000px; text-align: center; }
-        .video-box { position: relative; padding-bottom: 56.25%; border-radius: 25px; overflow: hidden; border: 2px solid var(--gold); margin-top: 20px; }
+        /* واجهة نجاح الإدارة */
+        #admin-success-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; z-index: 4000; }
+        .success-card { background: var(--card); border: 2px solid var(--gold); padding: 40px; border-radius: 35px; text-align: center; animation: slideUp 0.5s; }
+        .check-icon { font-size: 5rem; color: var(--gold); margin-bottom: 15px; }
+
+        /* المحتوى الرئيسي */
+        #main-content { display: none; width: 100%; max-width: 1000px; text-align: center; animation: fadeIn 1s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .video-box { position: relative; padding-bottom: 56.25%; border-radius: 30px; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.3); margin-top: 30px; }
         .video-box iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
-
-        /* لوحة تحكم الإدارة */
-        #admin-section { display: none; margin-top: 50px; background: rgba(15,15,15,0.95); padding: 30px; border-radius: 30px; border: 1px solid var(--gold); }
+        
+        /* لوحة التحكم */
+        #admin-section { display: none; margin-top: 60px; background: rgba(15,15,15,0.98); padding: 35px; border-radius: 35px; border: 1px solid var(--gold); }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         @media (max-width: 768px) { .admin-grid { grid-template-columns: 1fr; } }
-
-        .panel { background: #111; padding: 20px; border-radius: 20px; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        th, td { padding: 12px; border-bottom: 1px solid #222; text-align: center; }
+        .panel { background: #080808; padding: 20px; border-radius: 20px; border: 1px solid #222; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border-bottom: 1px solid #222; text-align: center; font-size: 0.85rem; }
         th { color: var(--gold); }
-        
-        .del-btn { background: none; border: 1px solid var(--error); color: var(--error); padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .del-btn { background: none; border: 1px solid var(--error); color: var(--error); padding: 6px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; }
         .del-btn:hover { background: var(--error); color: #fff; }
 
         .shake { animation: shake 0.4s; border-color: var(--error) !important; }
@@ -43,51 +67,50 @@
 
     <div id="login-overlay">
         <div class="card" id="card">
-            <h2 style="color: var(--gold);">منصة رؤيه</h2>
+            <h2 style="color: var(--gold); margin:0;">منصة رؤيه</h2>
+            <p style="color:#444; font-size:0.65rem; letter-spacing:3px;">PREMIUM SYSTEM V8</p>
             <input type="text" id="access-code" placeholder="أدخل كود الدخول">
-            <div id="err" style="color:var(--error); display:none; margin-top:15px; font-size:0.8rem;"></div>
+            <div id="err" style="color:var(--error); display:none; margin-top:15px; font-weight:bold;"></div>
             <button class="btn" onclick="validateAccess()">دخول</button>
+        </div>
+    </div>
+
+    <div id="kick-overlay">
+        <div class="kick-card">
+            <div class="kick-icon">🔒</div>
+            <h2 style="color: #fff; margin: 0;">انتهت جلستك</h2>
+            <p style="color: #666; margin-top: 10px;">تم إنهاء الدخول من قبل الإدارة أو انتهاء الوقت</p>
+            <button class="btn" onclick="location.reload()" style="width: auto; padding: 10px 40px; margin-top: 30px;">عودة للرئيسية</button>
+        </div>
+    </div>
+
+    <div id="admin-success-overlay">
+        <div class="success-card">
+            <div class="check-icon">⚜️</div>
+            <h2 style="color: var(--gold);">تمت العملية بنجاح</h2>
+            <p style="color: #888;">تم تحديث قاعدة البيانات السحابية فوراً</p>
+            <div style="color: #444; font-size: 0.7rem; margin-top: 20px;">جاري إغلاق النافذة...</div>
         </div>
     </div>
 
     <div id="main-content">
         <h1 style="background: linear-gradient(#fff, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">منصة رؤيه التعليمية</h1>
-        <div id="timer" style="color:var(--gold); font-weight:bold; margin-bottom:10px;">⌛ جاري المزامنة...</div>
-        
-        <div class="video-box">
-            <iframe src="https://www.youtube.com/embed/uyVLSMK2qsk" allowfullscreen></iframe>
-        </div>
+        <div id="timer" style="color:var(--gold); font-weight:bold; margin-bottom:20px;">⌛ جاري المزامنة...</div>
+        <div class="video-box"><iframe src="https://www.youtube.com/embed/uyVLSMK2qsk" allowfullscreen></iframe></div>
 
         <div id="admin-section">
-            <h2 style="color: var(--gold);">لوحة تحكم الإدارة</h2>
-            
-            <div style="margin-bottom: 20px;">
-                <input type="text" id="new-code" style="width:200px;" placeholder="إنشاء كود جديد">
-                <button class="btn" style="width:auto; padding:10px 30px;" onclick="addNewCode()">تفعيل وحفظ</button>
+            <h3 style="color: var(--gold); margin-bottom: 25px;">لوحة تحكم الإدارة</h3>
+            <div style="display:flex; gap:12px; justify-content:center; margin-bottom:30px;">
+                <input type="text" id="new-code" style="width:220px; margin:0;" placeholder="إنشاء كود جديد">
+                <button class="btn" style="width:auto; margin:0; padding:12px 30px;" onclick="addNewCode()">تفعيل الكود</button>
             </div>
-
             <div class="admin-grid">
-                <div class="panel">
-                    <h4 style="color:var(--success)">الأكواد المفعّلة حالياً</h4>
-                    <table id="codes-table">
-                        <thead><tr><th>الكود</th><th>الإجراء</th></tr></thead>
-                        <tbody id="codes-body"></tbody>
-                    </table>
-                </div>
-
-                <div class="panel">
-                    <h4 style="color:var(--gold)">الجلسات النشطة (لايف)</h4>
-                    <table>
-                        <thead><tr><th>الكود المستخدم</th><th>الجهاز</th><th>طرد</th></tr></thead>
-                        <tbody id="logs-body"></tbody>
-                    </table>
-                </div>
+                <div class="panel"><h4 style="color:var(--success)">الأكواد المفعّلة</h4><table id="codes-table"><thead><tr><th>الكود</th><th>إجراء</th></tr></thead><tbody id="codes-body"></tbody></table></div>
+                <div class="panel"><h4 style="color:var(--gold)">الجلسات النشطة</h4><table><thead><tr><th>الكود</th><th>الجهاز</th><th>طرد</th></tr></thead><tbody id="logs-body"></tbody></table></div>
             </div>
-            
-            <button class="btn" style="width:auto; background:#222; color:#777; margin-top:30px;" onclick="resetSystem()">تصفير شامل</button>
+            <button class="btn" style="width:auto; background:none; border:1px solid #333; color:#555; margin-top:40px;" onclick="resetSystem()">تصفير شامل</button>
         </div>
-        
-        <div style="margin-top:50px; opacity:0.2; cursor:pointer;" onclick="openAdmin()">[ لوحة الإدارة ]</div>
+        <div style="margin-top:60px; opacity:0.2; cursor:pointer;" onclick="openAdmin()">[ لوحة الإدارة ]</div>
     </div>
 
     <script>
@@ -108,16 +131,15 @@
             const code = document.getElementById('access-code').value.trim();
             const card = document.getElementById('card');
             const err = document.getElementById('err');
-            err.style.display = 'none';
+            err.style.display = 'none'; card.classList.remove('shake');
 
             if (code === ADMIN_PASS) { unlock(null); return; }
 
             db.ref('active_codes/' + code).once('value', snapshot => {
                 if (snapshot.exists() && snapshot.val() === true) {
                     db.ref('logs/' + code).once('value', logSnap => {
-                        if (logSnap.exists()) {
-                            showError("⚠️ الكود مستخدم بالفعل!");
-                        } else {
+                        if (logSnap.exists()) { showError("⚠️ الكود مستخدم بالفعل!"); } 
+                        else {
                             const info = { device: (navigator.userAgent.includes("Mobi") ? "Mobile" : "PC"), time: new Date().toLocaleTimeString('ar-EG') };
                             db.ref('logs/' + code).set(info);
                             const expiry = new Date().getTime() + (3*60*60*1000);
@@ -134,7 +156,6 @@
             const err = document.getElementById('err');
             err.innerText = msg; err.style.display = 'block';
             document.getElementById('card').classList.add('shake');
-            setTimeout(() => document.getElementById('card').classList.remove('shake'), 400);
         }
 
         function unlock(expiry) {
@@ -143,12 +164,16 @@
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('main-content').style.display = 'block';
                 if(expiry) startTimer(expiry);
-                else document.getElementById('timer').innerText = "وضع الإدارة";
+                else document.getElementById('timer').innerText = "وضع الإدارة المفتوح";
                 
                 const myCode = localStorage.getItem('my_code');
                 if(myCode) {
                     db.ref('logs/' + myCode).on('value', snap => {
-                        if(!snap.exists()) { alert("انتهت جلستك!"); location.reload(); }
+                        if(!snap.exists()) {
+                            localStorage.removeItem('rv_session');
+                            localStorage.removeItem('my_code');
+                            document.getElementById('kick-overlay').style.display = 'flex';
+                        }
                     });
                 }
             }, 800);
@@ -160,8 +185,14 @@
                 if(diff <= 0) { localStorage.clear(); location.reload(); }
                 const m = Math.floor((diff%3600000)/60000);
                 const s = Math.floor((diff%60000)/1000);
-                document.getElementById('timer').innerText = `⏳ متبقي: ${m}:${s}`;
+                document.getElementById('timer').innerText = `⏳ متبقي لك: ${m}:${s}`;
             }, 1000);
+        }
+
+        function showAdminSuccess() {
+            const overlay = document.getElementById('admin-success-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.display = 'none'; }, 2000);
         }
 
         function openAdmin() {
@@ -175,55 +206,58 @@
             const code = document.getElementById('new-code').value.trim();
             if(code) db.ref('active_codes/' + code).set(true).then(() => {
                 document.getElementById('new-code').value = "";
+                showAdminSuccess();
             });
         }
 
         function loadAdminData() {
-            // تحميل الأكواد المتاحة
             db.ref('active_codes').on('value', snap => {
                 const body = document.getElementById('codes-body');
                 body.innerHTML = "";
                 snap.forEach(child => {
                     if(child.val() === true) {
-                        body.innerHTML += `<tr><td>${child.key}</td>
-                        <td><button class="del-btn" onclick="deleteCode('${child.key}')">إلغاء وتفعيل</button></td></tr>`;
+                        body.innerHTML += `<tr><td>${child.key}</td><td><button class="del-btn" onclick="deleteCode('${child.key}')">حذف</button></td></tr>`;
                     }
                 });
             });
-
-            // تحميل الجلسات النشطة
             db.ref('logs').on('value', snap => {
                 const body = document.getElementById('logs-body');
                 body.innerHTML = "";
                 snap.forEach(child => {
-                    body.innerHTML += `<tr><td style="color:var(--gold)">${child.key}</td>
-                    <td>${child.val().device}</td>
-                    <td><button class="del-btn" onclick="terminate('${child.key}')">طرد</button></td></tr>`;
+                    body.innerHTML += `<tr><td style="color:var(--gold)">${child.key}</td><td>${child.val().device}</td><td><button class="del-btn" onclick="terminate('${child.key}')">طرد</button></td></tr>`;
                 });
             });
         }
 
         function deleteCode(code) {
-            if(confirm("حذف الكود؟ سيتم طرد أي شخص يستخدمه حالياً.")) {
-                db.ref('active_codes/' + code).remove();
+            if(confirm("حذف الكود؟")) { 
+                db.ref('active_codes/' + code).remove(); 
                 db.ref('logs/' + code).remove();
+                showAdminSuccess();
             }
         }
 
         function terminate(code) {
-            if(confirm("طرد المستخدم؟")) {
-                db.ref('logs/' + code).remove();
+            if(confirm("طرد المستخدم؟")) { 
+                db.ref('logs/' + code).remove(); 
                 db.ref('active_codes/' + code).set(false);
+                showAdminSuccess();
             }
         }
 
-        function resetSystem() {
-            if(confirm("تصفير شامل؟")) db.ref('/').remove();
-        }
+        function resetSystem() { if(confirm("تصفير شامل؟")) db.ref('/').remove(); }
 
         window.onload = () => {
             const session = localStorage.getItem('rv_session');
-            if(session && new Date().getTime() < session) unlock(session);
+            const myCode = localStorage.getItem('my_code');
+            if(session && new Date().getTime() < session) {
+                if (myCode) {
+                    db.ref('logs/' + myCode).once('value', snap => {
+                        if (snap.exists()) { unlock(session); } 
+                        else { localStorage.clear(); }
+                    });
+                } else { unlock(session); }
+            }
         };
     </script>
 </body>
